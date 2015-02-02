@@ -1,0 +1,14 @@
+------------------------------------------------------------------------
+r28 | zernin | 2012-09-01 20:24:11 +0000 (Sat, 01 Sep 2012) | 1 line
+Changed paths:
+   A /tags/2.4 (from /trunk:27)
+
+Tagging 2.4 release for WoW 5.x.
+------------------------------------------------------------------------
+r27 | zernin | 2012-09-01 20:23:05 +0000 (Sat, 01 Sep 2012) | 1 line
+Changed paths:
+   M /trunk/MasterLootManager.lua
+   M /trunk/MasterLootManagerRemix.toc
+
+Updates for wow 5.0.
+------------------------------------------------------------------------

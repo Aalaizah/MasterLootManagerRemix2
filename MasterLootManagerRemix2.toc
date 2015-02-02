@@ -1,0 +1,11 @@
+## Interface: 60000
+## Title: Master Loot Manager Remix
+## Author: amm4108, Zernin
+## Version: 3.0
+## Notes: Eases the stresses of passing out loot.
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: MasterLootManagerSettings,MasterLootLogger_Log,MasterLootLogger_LastExport
+Localization.lua
+MasterLootManager2.xml
+MasterLootLogger2.xml
