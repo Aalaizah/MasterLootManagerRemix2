@@ -178,14 +178,12 @@ end
 function MasterLootManager:AwardLootClicked(buttonFrame)
 	local itemLink = MasterLootTable:GetItemLink(self.currentItemIndex)
 	for i = 1, GetNumGroupMembers(), 1 do
-			ChatFrame1:AddMessage("hi")
 			number = string.find(MasterLootPlayers[i], "-")
 			if number == nil then
 				newPlayer = MasterLootPlayers[i]
 			else
 				number = number - 1
 				newPlayer = string.sub(MasterLootPlayers[i], 1, number)
-				ChatFrame1:AddMessage("newPlayer" .. newPlayer)
 			end
 			if MasterLootRolls.winningPlayer == newPlayer then
 				MasterLootRolls.winningPlayer = MasterLootPlayers[i]
