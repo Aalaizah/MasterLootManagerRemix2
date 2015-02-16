@@ -18,10 +18,11 @@ MasterLootManagerSettings = {ascending = false,
 	                         enforcehigh = true,
                              ignorefixed = true,
 							 raidwarning = true,
+							 countdownwarning = true,
 	                        }
 
 MasterLootTable = {lootCount = 0, loot = {}}
-
+local currentItemLink, noSpec, countdown
 MasterLootRolls = {rollCount = 0, rolls = {}}
 
 local MasterLootPlayers = {}
@@ -188,13 +189,13 @@ function MasterLootManager:AwardLootClicked(buttonFrame)
 			end
 			if MasterLootRolls.winningPlayer == newPlayer then
 				MasterLootRolls.winningPlayer = MasterLootPlayers[i]
-				ChatFrame1:AddMessage("winningPlayer" .. MasterLootPlayers[i])
 			end
 		end
 	if AssignLoot(itemLink, MasterLootRolls.winningPlayer) then
 		MasterLootLogger:ProcessItem(itemLink, MasterLootRolls.winningPlayer, self.lastRollType, MasterLootRolls:GetWinningValue());
 		self:Speak(string.format(MLM_Local["Congratutlations to on winning"], MasterLootRolls.winningPlayer, itemLink))
 	end
+	noSpec = false
 end
 
 function MasterLootManager:OnEvent(self, event, ...)
@@ -208,11 +209,9 @@ function MasterLootManager:OnEvent(self, event, ...)
 			end
 			if MasterLootPlayers == nil then
 				for i = 1, GetNumGroupMembers(), 1 do
-					--if GetMasterLootCandidate(i) then
-						name, rank, subgroup, level, class = GetRaidRosterInfo(i)
+						name = GetRaidRosterInfo(i)
 						table.insert(MasterLootPlayers, name)
 						--ChatFrame1:AddMessage(table.getn(MasterLootPlayers))
-					--end
 				end
 			else
 				MasterLootPlayers = {}
@@ -280,28 +279,61 @@ function MasterLootRolls:AddRoll(player, roll)
 	self.rolls[self.rollCount].roll = roll
 	
 	MasterLootManager:DebugPrint("Added roll for " .. player)
-	--if(CompareItemClass(playerClass, currentItem) then
-		self:UpdateTopRoll()
-		
-		MasterLootManager:DebugPrint("Winner: " .. self.winningPlayer)
-		self:UpdateRollList()
-	--end
+	--local pItemLink = MasterLootTable:GetItemLink(self.currentItemIndex)
+	local itemSlot, itemLink, playerIndex
+	itemSlot = 1
+	for itemIndex=1, GetNumLootItems() do
+		itemLink = GetLootSlotLink(itemIndex)
+		if itemLink == currentItemLink then
+			itemSlot = itemIndex;
+			iName, iLink, iRare, iLvl, iMinLvl, itemType, currentItem = GetItemInfo(itemLink) 
+			break
+		end
+	end
+	for currentIndex = 1, table.getn(MasterLootPlayers), 1 do
+		if player == MasterLootPlayers[currentIndex] then
+			playerIndex = currentIndex
+		end
+	end
+	if GetMasterLootCandidate(itemSlot, playerIndex) then
+		if not noSpec then
+			if (itemType == "Armor" and currentItem ~= "Miscellaneous") then
+				if MasterLootManager:CompareItemClass(UnitClass(player), currentItem) then
+					self:UpdateTopRoll()
+					
+					MasterLootManager:DebugPrint("Winner: " .. self.winningPlayer)
+					self:UpdateRollList()
+				end
+			else
+				self:UpdateTopRoll()
+					
+				MasterLootManager:DebugPrint("Winner: " .. self.winningPlayer)
+				self:UpdateRollList()
+			end
+		else
+			self:UpdateTopRoll()
+					
+			MasterLootManager:DebugPrint("Winner: " .. self.winningPlayer)
+			self:UpdateRollList()
+			self:UpdateRollList()
+		end
+	end
 end
 
 function MasterLootManager:CompareItemClass(playerClass, item)
-	if(playerClass == "DEATHKNIGHT" or playerClass == "WARRIOR" or playerClass == "PALADIN") then
+	if(playerClass == "Death Knight" or playerClass == "Warrior" or playerClass == "Paladin") then
 		if(item == "Plate") then
 			return true
 		end
-	elseif(playerClass == "MONK" or playerClass == "DRUID" or playerClass == "ROGUE") then
+	elseif(playerClass == "Monk" or playerClass == "Druid" or playerClass == "Rogue") then
 		if(item == "Leather") then
 			return true
 		end
-	elseif(playerClass == "HUNTER" or playerClass == "SHAMAN") then
+	elseif(playerClass == "Hunter" or playerClass == "Shaman") then
 		if(item == "Mail") then
 			return true
 		end
-	elseif(playerClass == "MAGE" or playerClass == "WARLOCK" or playerClass == "PRIEST") then
+	elseif(playerClass == "Mage" or playerClass == "Warlock" or playerClass == "Priest") then
 		if(item == "Cloth") then
 			return true
 		end
@@ -558,6 +590,7 @@ function MasterLootManager:UpdateCurrentItem()
 		local currentItemTexture = getglobal("MasterLootManagerMain_CurrentItemTexture")
 		currentItemTexture:SetTexture(itemTexture)
 		self:DebugPrint("Changed item link")
+		currentItemLink = itemLink
 	else
 		self:DebugPrint("Item doesn't exist")	
 	end
@@ -620,6 +653,7 @@ function MasterLootManager:AnnounceOffSpecClicked(buttonFrame)
 end
 
 function MasterLootManager:AnnounceNoSpecClicked(buttonFrame)
+	noSpec = true
 	local itemLink = MasterLootTable:GetItemLink(self.currentItemIndex)
 	MasterLootRolls:ClearRolls()
 	self:Speak(string.format(MLM_Local["Roll on "], itemLink))
@@ -654,6 +688,7 @@ function MasterLootManager:OnUpdate()
 			currentCountdownPosition = 1
 		end
 		local i = self.countdownLastDisplayed - 1
+		countdown = true
 		while (i >= currentCountdownPosition) do
 			self:Speak(i)
 			i = i - 1
@@ -664,6 +699,7 @@ function MasterLootManager:OnUpdate()
 			self.countdownRunning = false
 		end
 	end
+	countdown = false
 end
 
 function MasterLootManager:Speak(str)
@@ -674,10 +710,18 @@ function MasterLootManager:Speak(str)
 	end
 	
 	if (self:PlayerIsInARaid()) then
-		if(MasterLootManagerSettings.raidwarning) then
-			chatType = "RAID_WARNING";
+		if(countdown) then
+			if(MasterLootManagerSettings.countdownwarning) then
+				chatType = "RAID_WARNING"
+			else
+				chatType = "RAID"
+			end
 		else
-			chatType = "RAID"
+			if(MasterLootManagerSettings.raidwarning) then
+				chatType = "RAID_WARNING"
+			else
+				chatType = "RAID"
+			end
 		end
 	end
 	
@@ -815,10 +859,21 @@ function MasterLootManager:InitializeSettingsMenuList()
             checked = function() return MasterLootManagerSettings.raidwarning end,
             keepShownOnClick = 1, 
 		},
+		{
+			text = MLM_Local["Countdown Use Raid Warning"],
+			func = function() MasterLootManagerSettings.countdownwarning = not MasterLootManagerSettings.countdownwarning end,
+            checked = function() return MasterLootManagerSettings.countdownwarning end,
+            keepShownOnClick = 1, 
+		},
         {
             text = MLM_Local["Close"],
             func = function() CloseDropDownMenus() end,
             notCheckable = 1,
         },
     }
+end
+
+SLASH_MASTERLOOTMANAGER1, SLASH_MASTERLOOTMANAGER2 = '/ml', '/masterlootmanager'
+function SlashCmdList.MASTERLOOTMANAGER(msg, editbox)
+	MasterLootManager.frame:Show()
 end
