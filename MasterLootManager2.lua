@@ -25,6 +25,7 @@ MasterLootTable = {lootCount = 0, loot = {}}
 MasterLootRolls = {rollCount = 0, rolls = {}}
 
 local MasterLootPlayers = {}
+local MasterLootClass = {}
 
 function MasterLootManager:Print(str)
 	DEFAULT_CHAT_FRAME:AddMessage(str)
@@ -205,10 +206,23 @@ function MasterLootManager:OnEvent(self, event, ...)
 			if (MasterLootTable.lootCount > 0) then
 				self.frame:Show()
 			end
-			for i = 1, GetNumGroupMembers(), 1 do
-				name = GetRaidRosterInfo(i)
-				table.insert(MasterLootPlayers, name)
-				--ChatFrame1:AddMessage(table.getn(MasterLootPlayers))
+			if MasterLootPlayers == nil then
+				for i = 1, GetNumGroupMembers(), 1 do
+					--if GetMasterLootCandidate(i) then
+						name, rank, subgroup, level, class = GetRaidRosterInfo(i)
+						table.insert(MasterLootPlayers, name)
+						--ChatFrame1:AddMessage(table.getn(MasterLootPlayers))
+					--end
+				end
+			else
+				MasterLootPlayers = {}
+				for i = 1, GetNumGroupMembers(), 1 do
+					--if GetMasterLootCandidate(i) then
+						name, rank, subgroup, level, class = GetRaidRosterInfo(i)
+						table.insert(MasterLootPlayers, name)
+						--ChatFrame1:AddMessage(table.getn(MasterLootPlayers))
+					--end
+				end
 			end
 		else
 			self:DebugPrint("Loot was opened, but the player is not the master looter.")
@@ -266,11 +280,34 @@ function MasterLootRolls:AddRoll(player, roll)
 	self.rolls[self.rollCount].roll = roll
 	
 	MasterLootManager:DebugPrint("Added roll for " .. player)
-	
-	self:UpdateTopRoll()
-	
-	MasterLootManager:DebugPrint("Winner: " .. self.winningPlayer)
-	self:UpdateRollList()
+	--if(CompareItemClass(playerClass, currentItem) then
+		self:UpdateTopRoll()
+		
+		MasterLootManager:DebugPrint("Winner: " .. self.winningPlayer)
+		self:UpdateRollList()
+	--end
+end
+
+function MasterLootManager:CompareItemClass(playerClass, item)
+	if(playerClass == "DEATHKNIGHT" or playerClass == "WARRIOR" or playerClass == "PALADIN") then
+		if(item == "Plate") then
+			return true
+		end
+	elseif(playerClass == "MONK" or playerClass == "DRUID" or playerClass == "ROGUE") then
+		if(item == "Leather") then
+			return true
+		end
+	elseif(playerClass == "HUNTER" or playerClass == "SHAMAN") then
+		if(item == "Mail") then
+			return true
+		end
+	elseif(playerClass == "MAGE" or playerClass == "WARLOCK" or playerClass == "PRIEST") then
+		if(item == "Cloth") then
+			return true
+		end
+	else
+		return false
+	end
 end
 
 function MasterLootRolls:UpdateTopRoll()
