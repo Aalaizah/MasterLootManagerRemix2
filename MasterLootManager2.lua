@@ -18,7 +18,7 @@ MasterLootManagerSettings = {ascending = false,
 	                         enforcehigh = true,
                              ignorefixed = true,
 							 raidwarning = true,
-							 countdownwarning = true,
+							 countdownwarning = false,
 	                        }
 
 MasterLootTable = {lootCount = 0, loot = {}}
@@ -26,7 +26,6 @@ local currentItemLink, noSpec, countdown
 MasterLootRolls = {rollCount = 0, rolls = {}}
 
 local MasterLootPlayers = {}
-local MasterLootClass = {}
 
 function MasterLootManager:Print(str)
 	DEFAULT_CHAT_FRAME:AddMessage(str)
@@ -286,7 +285,7 @@ function MasterLootRolls:AddRoll(player, roll)
 		itemLink = GetLootSlotLink(itemIndex)
 		if itemLink == currentItemLink then
 			itemSlot = itemIndex;
-			iName, iLink, iRare, iLvl, iMinLvl, itemType, currentItem = GetItemInfo(itemLink) 
+			iName, iLink, iRare, iLvl, iMinLvl, itemType, currentItem, iStack, itemLoc = GetItemInfo(itemLink) 
 			break
 		end
 	end
@@ -297,7 +296,7 @@ function MasterLootRolls:AddRoll(player, roll)
 	end
 	if GetMasterLootCandidate(itemSlot, playerIndex) then
 		if not noSpec then
-			if (itemType == "Armor" and currentItem ~= "Miscellaneous") then
+			if (itemType == "Armor" and currentItem ~= "Miscellaneous" and itemLoc ~= "INVTYPE_CLOAK") then
 				if MasterLootManager:CompareItemClass(UnitClass(player), currentItem) then
 					self:UpdateTopRoll()
 					
@@ -875,5 +874,9 @@ end
 
 SLASH_MASTERLOOTMANAGER1, SLASH_MASTERLOOTMANAGER2 = '/ml', '/masterlootmanager'
 function SlashCmdList.MASTERLOOTMANAGER(msg, editbox)
-	MasterLootManager.frame:Show()
+	if MasterLootManager.frame:IsShown() then
+		MasterLootManager.frame:Hide()
+	else
+		MasterLootManager.frame:Show()
+	end
 end
