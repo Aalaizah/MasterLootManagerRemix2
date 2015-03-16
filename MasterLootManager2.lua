@@ -294,7 +294,7 @@ function MasterLootRolls:AddRoll(player, roll)
 			playerIndex = currentIndex
 		end
 	end
-	if GetMasterLootCandidate(itemSlot, playerIndex) then
+	--if GetMasterLootCandidate(itemSlot, playerIndex) then
 		if not noSpec then
 			if (itemType == "Armor" and currentItem ~= "Miscellaneous" and itemLoc ~= "INVTYPE_CLOAK") then
 				if MasterLootManager:CompareItemClass(UnitClass(player), currentItem) then
@@ -316,7 +316,7 @@ function MasterLootRolls:AddRoll(player, roll)
 			self:UpdateRollList()
 			self:UpdateRollList()
 		end
-	end
+	--end
 end
 
 function MasterLootManager:CompareItemClass(playerClass, item)
