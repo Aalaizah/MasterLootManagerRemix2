@@ -314,7 +314,6 @@ function MasterLootRolls:AddRoll(player, roll)
 					
 			MasterLootManager:DebugPrint("Winner: " .. self.winningPlayer)
 			self:UpdateRollList()
-			self:UpdateRollList()
 		end
 	--end
 end
