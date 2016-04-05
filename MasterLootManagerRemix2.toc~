@@ -1,7 +1,7 @@
-## Interface: 60200
+## Interface: 60100
 ## Title: Master Loot Manager Remix
 ## Author: amm4108, Zernin
-## Version: 4.1
+## Version: 4.0
 ## Notes: Eases the stresses of passing out loot.
 ## DefaultState: Enabled
 ## LoadOnDemand: 0

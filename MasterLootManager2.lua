@@ -1,5 +1,5 @@
 ﻿MasterLootManager = {frame = nil, 
-					 debugging = false, 
+					 debugging = true, 
 					 countdownRange = 5, 
 					 countdownRunning = false,
                      disenchant = nil,
@@ -276,6 +276,8 @@ function MasterLootRolls:AddRoll(player, roll)
 	self.rolls[self.rollCount] = {}
 	self.rolls[self.rollCount].player = player
 	self.rolls[self.rollCount].roll = roll
+    
+    --MasterLootManager:DebugPrint(self.rolls[self.rollcount].player)
 	
 	MasterLootManager:DebugPrint("Added roll for " .. player)
 	--local pItemLink = MasterLootTable:GetItemLink(self.currentItemIndex)
@@ -759,7 +761,8 @@ function MasterLootManager:UpdateDropdowns()
         local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(x);
         --sets the group member key to the players name. Also stores thier raid index. 
         --TODO: figure out why I set the value and key as name, instead of one as x
-        self.dropdownData[subgroup][name] = name;
+        -- because lol now it's numbers instead of names
+        self.dropdownData[subgroup][x] = name;
         --TODO: confirm current DE/Bank char is still in raid
         self.dropdownGroupData[subgroup] = true;
     end
@@ -774,10 +777,10 @@ function MasterLootManager:InitializeDropdown()
             local info = UIDropDownMenu_CreateInfo();
             info.hasArrow = false;
             info.notCheckable = true;
-            info.text = key;
+            info.text = value;
             info.func = MasterLootManager.DropClicked;
 			info.arg1 = UIDROPDOWNMENU_OPEN_MENU;
-			info.arg2 = key;
+			info.arg2 = value;
             UIDropDownMenu_AddButton(info, UIDROPDOWNMENU_MENU_LEVEL);
         end
     end
