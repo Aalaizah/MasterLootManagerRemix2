@@ -1,5 +1,5 @@
 ﻿MasterLootManager = {frame = nil, 
-					 debugging = true, 
+					 debugging = false, 
 					 countdownRange = 5, 
 					 countdownRunning = false,
                      disenchant = nil,
